@@ -62,30 +62,80 @@ int StringParserClass::getDataBetweenTags(char *pDataToSearchThru, std::vector<s
 			return ERROR_DATA_NULL;
 		}
 
-	while (*pDataToSearchThru != "\0"){
+	while (*pDataToSearchThru != '\0'){
 		string data = " ";
-
-
-
+		bool found = true;
+		char *pStartCopy = new char[strlen(pStartTag)];
+		strncpy(pStartCopy, pStartTag, strlen(pStartTag));
+		if (*pDataToSearchThru == '<') {
+			while (*pStartCopy != '>') {
+		}
+			if (*pDataToSearchThru != *pStartCopy) {
+				found = false;
+			}
+			pStartCopy++;
+			pDataToSearchThru++;
+		}
+		if (found) {
+			pDataToSearchThru++;
+			while (*pDataToSearchThru != '\0' && found) {
+				if (*pDataToSearchThru == '<') {
+					found = false;
+					char *pEndCopy = new char[strlen(pEndTag)];
+					strncpy(pEndCopy, pEndTag, strlen(pEndTag));
+					while (*pEndCopy != '>') {
+						if (*pDataToSearchThru != *pEndCopy) {
+							found = true;
+						}
+						pDataToSearchThru++;
+						pEndCopy++;
+					}
+				}
+				else {
+					data += *pDataToSearchThru;
+					pDataToSearchThru++;
+				}
+			}
+			if(!found) {
+				myVector.push_back(data);
+			}
+			data = "";
+		} else {
+			pDataToSearchThru++;
+		}
 	}
+		return SUCCESS;
 }
 
 void StringParserClass::cleanup() {
-	*pStartTag = NULL;
-	*pEndTag = NULL;
+	*pStartTag = 0;
+	*pEndTag = 0;
 	areTagsSet = false;
 }
 
 int StringParserClass::findTag(char *pTagToLookFor, char *&pStart, char *&pEnd) {
-	int len = strlen(pTagToLookFor);
+	int length = strlen(pTagToLookFor);
 		if (pStart == NULL || pEnd == NULL) {
 			return ERROR_TAGS_NULL;
 		}
 		int i = 0;
 		while (pStart[i] != 0) {
 			bool found = true;
+			if (pStart[i] == '<') {
+				for (int j = 0; j < length; j++) {
+					if (pEnd[i + j] != pTagToLookFor[j]) {
+						found = false;
+					}
+				}
+				if (found) {
+					*pStart = pStart[i];
+					*pEnd = pStart[i + length];
+					return SUCCESS;
+				}
+			}
+			i++;
 		}
-
+		return FAIL;
 
 }
 
